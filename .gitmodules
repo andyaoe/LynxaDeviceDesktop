@@ -1,0 +1,3 @@
+[submodule "LynxaProtocolBuffers"]
+	path = LynxaProtocolBuffers
+	url = https://github.com/andyaoe/LynxaProtocolBuffers.git
