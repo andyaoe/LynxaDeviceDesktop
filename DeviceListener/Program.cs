@@ -13,7 +13,7 @@ namespace DeviceListener
     {
         static void Main(string[] args)
         {
-            SerialPort _serialPort = new SerialPort("COM4", 115200, Parity.None, 8, StopBits.One);
+            SerialPort _serialPort = new SerialPort("COM2", 115200, Parity.None, 8, StopBits.One);
             _serialPort.Handshake = Handshake.None;
             _serialPort.ReadTimeout = 1000;
             _serialPort.WriteTimeout = 1000;
@@ -31,6 +31,8 @@ namespace DeviceListener
                         lynxa_message_info = my_message_handler.ParsePacket((byte)data);
                         if (lynxa_message_info != null)
                         {
+
+                            Console.WriteLine("------------------------------------");
                             switch (lynxa_message_info.messageId)
                             {
                                 case 100:
@@ -42,6 +44,17 @@ namespace DeviceListener
                                 case 102:
                                     WifiStationList_102 wifiStationList_102 = WifiStationList_102.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
                                     Console.WriteLine($"Number of Wifi Stations:{wifiStationList_102.NumberStationsFound}");
+                                    for (int i = 0; i < wifiStationList_102.NumberStationsFound; i++)
+                                    {
+                                        Console.Write($"BSSID:");
+                                        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[0]}:");
+                                        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[1]}:");
+                                        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[2]}:");
+                                        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[3]}:");
+                                        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[4]}:");
+                                        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[5]}\r\n");
+                                        Console.WriteLine($"RSSI:{wifiStationList_102.WifiStations[i].Rssi}");
+                                    }
                                     break;
                                 case 103:
                                     ModemParameters_103 modemParameters_103 = ModemParameters_103.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
