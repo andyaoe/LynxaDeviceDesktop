@@ -19,8 +19,8 @@ namespace Lynxa
         public UInt16 messageId { get; set; }
         public UInt16 totalMessageSize { get; set; }
         public UInt16 payloadSize { get; set; }
-        public UInt16 payloadPointer { get; set; }
-        public UInt16 messagePointer { get; set; }
+        public byte[] payloadBuffer { get; set; }
+        public byte[] messageBuffer { get; set; }
     }
 
     public class MessageHandler
@@ -52,11 +52,12 @@ namespace Lynxa
             ResetStateMachine();
         }
 
-        public void ParsePacket(byte value)
+        public LynxaMessageInfo ParsePacket(byte value)
         {
             bool full_packet_received = false;
             bool reset_state_machine = false;
             UInt16 calculated_checksum = 0;
+            LynxaMessageInfo lynxa_message_info = null;
 
             //Console.Write($"{value:X} ");
             _packetBuffer[_packetCounter++] = value;
@@ -138,24 +139,23 @@ namespace Lynxa
 
             if (full_packet_received)
             {
-                Console.WriteLine("_messageId=" + _messageId);
-                Console.WriteLine("_payloadSize=" + _payloadSize);
-                Console.WriteLine("_checksum=" + _checksum);
-                Console.WriteLine("_calculated_checksum=" + calculated_checksum);
+                lynxa_message_info = new LynxaMessageInfo();
+                lynxa_message_info.messageId = _messageId;
+                lynxa_message_info.payloadSize = _payloadSize;
+                lynxa_message_info.totalMessageSize = _packetCounter;
+                lynxa_message_info.messageBuffer = new byte[_packetCounter];
+                lynxa_message_info.payloadBuffer = new byte[_payloadSize];
 
-                byte[] payload_buffer = new byte[_payloadSize];
-                Array.Copy(_packetBuffer, 6, payload_buffer, 0, _payloadSize);
-
-                GnggaMessage_100 nmeaRecord_100 = GnggaMessage_100.Parser.ParseFrom(payload_buffer);
-                Console.WriteLine("Nmea Record Received:");
-                Console.WriteLine($"Latitude:{nmeaRecord_100.LatitudeDegrees}");
-                Console.WriteLine($"Longitude:{nmeaRecord_100.LongitudeDegrees}");
+                Array.Copy(_packetBuffer, 0, lynxa_message_info.messageBuffer, 0, _packetCounter);
+                Array.Copy(_packetBuffer, 6, lynxa_message_info.payloadBuffer, 0, _payloadSize);
             }
 
             if (reset_state_machine)
             {
                 ResetStateMachine();
             }
+
+            return lynxa_message_info;
         }
     }
 }
