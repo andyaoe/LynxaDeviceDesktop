@@ -12,27 +12,25 @@ namespace ProtoBufTest
     {
         static void Main(string[] args)
         {
-            NmeaRecord_100 nmea_record_100 = new NmeaRecord_100
+            GnggaMessage_100 gngga_message_100 = new GnggaMessage_100
             {
-                Timestamp = 12345,
-                Latitude = 1.0f,
-                Longitude = 1.0f
+                LatitudeDegrees = 100,
+                LongitudeDegrees = 200
             };
 
             using (var output = File.Create("nmea_serialized.dat"))
             {
-                nmea_record_100.WriteTo(output);
+                gngga_message_100.WriteTo(output);
             }
 
             using (var input = File.OpenRead("nmea_serialized.dat"))
             {
-                nmea_record_100 = NmeaRecord_100.Parser.ParseFrom(input);
+                gngga_message_100 = GnggaMessage_100.Parser.ParseFrom(input);
             }
 
             Console.WriteLine("Nmea Record Contents");
-            Console.WriteLine("TimeStamp=" + nmea_record_100.Timestamp);
-            Console.WriteLine("Latitude=" + nmea_record_100.Latitude);
-            Console.WriteLine("Longitude=" + nmea_record_100.Longitude);
+            Console.WriteLine("Latitude Degrees=" + gngga_message_100.LatitudeDegrees);
+            Console.WriteLine("Longitude Degrees=" + gngga_message_100.LongitudeDegrees);
             Console.WriteLine("COMPLETE!");
         }
     }

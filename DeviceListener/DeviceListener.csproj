@@ -42,9 +42,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LynxaDeviceMessages.cs" />
+    <Compile Include="..\LynxaProtocolBuffers\LynxaDeviceMessages.cs">
+      <Link>LynxaDeviceMessages.cs</Link>
+    </Compile>
+    <Compile Include="..\LynxaProtocolBuffers\Nanopb.cs">
+      <Link>Nanopb.cs</Link>
+    </Compile>
     <Compile Include="MessageHandler.cs" />
-    <Compile Include="Nanopb.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
