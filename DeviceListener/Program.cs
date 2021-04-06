@@ -38,24 +38,30 @@ namespace DeviceListener
                                 case 100:
                                     GnggaMessage_100 nmeaRecord_100 = GnggaMessage_100.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
                                     Console.WriteLine("Nmea Record Received:");
+                                    Console.WriteLine($"epochTime:{nmeaRecord_100.EpochTime}");
+                                    Console.WriteLine($"LatitudeMinutes:{nmeaRecord_100.LatitudeMinutes}");
                                     Console.WriteLine($"LatitudeDegrees:{nmeaRecord_100.LatitudeDegrees}");
-                                    Console.WriteLine($"LongitudeDegrees:{nmeaRecord_100.LongitudeDegrees}");
+                                    Console.WriteLine($"LatitudeCardinalAscii:{nmeaRecord_100.LatitudeCardinalAscii}");
+                                    Console.WriteLine($"longitudeMinutes:{nmeaRecord_100.LongitudeMinutes}");
+                                    Console.WriteLine($"longitudeDegrees:{nmeaRecord_100.LongitudeDegrees}");
+                                    Console.WriteLine($"longitudeCardinalAscii:{nmeaRecord_100.LongitudeCardinalAscii}");
+                                    Console.WriteLine($"numberOfSatellitesInUse:{nmeaRecord_100.NumberOfSatellitesInUse}");
                                     break;
-                                case 102:
-                                    WifiStationList_102 wifiStationList_102 = WifiStationList_102.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
-                                    Console.WriteLine($"Number of Wifi Stations:{wifiStationList_102.NumberStationsFound}");
-                                    for (int i = 0; i < wifiStationList_102.NumberStationsFound; i++)
-                                    {
-                                        Console.Write($"BSSID:");
-                                        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[0]}:");
-                                        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[1]}:");
-                                        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[2]}:");
-                                        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[3]}:");
-                                        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[4]}:");
-                                        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[5]}\r\n");
-                                        Console.WriteLine($"RSSI:{wifiStationList_102.WifiStations[i].Rssi}");
-                                    }
-                                    break;
+                                //case 102:
+                                //    WifiStationList_102 wifiStationList_102 = WifiStationList_102.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
+                                //    Console.WriteLine($"Number of Wifi Stations:{wifiStationList_102.NumberStationsFound}");
+                                //    for (int i = 0; i < wifiStationList_102.NumberStationsFound; i++)
+                                //    {
+                                //        Console.Write($"BSSID:");
+                                //        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[0]}:");
+                                //        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[1]}:");
+                                //        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[2]}:");
+                                //        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[3]}:");
+                                //        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[4]}:");
+                                //        Console.Write($"{wifiStationList_102.WifiStations[i].Bssid[5]}\r\n");
+                                //        Console.WriteLine($"RSSI:{wifiStationList_102.WifiStations[i].Rssi}");
+                                //    }
+                                //    break;
                                 case 103:
                                     ModemParameters_103 modemParameters_103 = ModemParameters_103.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
                                     Console.WriteLine("ModemParameters Received:");
