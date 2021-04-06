@@ -14,34 +14,52 @@ namespace Lynxa
         Nmea_100 = 100,
     }
     
-    public class MessageFields
+    public class LynxaMessageInfo
     {
-        public MessageId messageId { get; set; }
+        public UInt16 messageId { get; set; }
+        public UInt16 totalMessageSize { get; set; }
         public UInt16 payloadSize { get; set; }
+        public UInt16 payloadPointer { get; set; }
+        public UInt16 messagePointer { get; set; }
     }
 
-    public static class MessageHandler
+    public class MessageHandler
     {
-        public static int _parserState = 0;
-        public static MessageFields _parserMessageFields = new MessageFields();
-        private static byte _messageIdLsb;
-        private static byte _messageIdMsb;
-        private static byte _payloadSizeLsb;
-        private static byte _payloadSizeMsb;
-        private static byte _checksumLsb;
-        private static byte _checksumMsb;
-        private static UInt16 _messageId;
-        private static UInt16 _payloadSize;
-        private static UInt16 _payloadCounter;
-        private static UInt16 _checksum;
-        private static UInt16 _runningChecksum;
-        private static byte[] _payloadBuffer = new byte[1024];
+        public int _parserState = 0;
+        private byte _messageIdLsb;
+        private byte _messageIdMsb;
+        private UInt16 _messageId;
+        private byte _payloadSizeLsb;
+        private byte _payloadSizeMsb;
+        private UInt16 _payloadSize;
+        private byte _checksumLsb;
+        private byte _checksumMsb;
+        private UInt16 _checksum;
+        private byte[] _packetBuffer = new byte[1024];
+        private UInt16 _packetCounter = 0;
+        private UInt16 _payloadCounter = 0;
+        private UInt16 _checksumPayloadIndex = 0;
 
-        public static void ParsePacket(byte value)
+        private void ResetStateMachine()
+        {
+            _parserState = 0;
+            _packetCounter = 0;
+            _payloadCounter = 0;
+        }
+
+        public MessageHandler()
+        {
+            ResetStateMachine();
+        }
+
+        public void ParsePacket(byte value)
         {
             bool full_packet_received = false;
+            bool reset_state_machine = false;
+            UInt16 calculated_checksum = 0;
 
             //Console.Write($"{value:X} ");
+            _packetBuffer[_packetCounter++] = value;
 
             switch (_parserState)
             {
@@ -50,59 +68,71 @@ namespace Lynxa
                     {
                         _parserState++;
                     }
+                    else
+                    {
+                        reset_state_machine = true;
+                    }
                     break;
                 case 1: //look for the second magic byte '#'
                     if (value == '#')
                     {
                         _parserState++;
-                        _runningChecksum = 0;
                     }
                     else
                     {
-                        _parserState = 0;
+                        reset_state_machine = true;
                     }
                     break;
-                case 2: //save the message id (LSB)
-                    _messageIdLsb = value;
-                    _runningChecksum += value;
+                case 2: //save the message id (MSB)
+                    _messageIdMsb = value;
                     _parserState++;
                     break;
-                case 3: //save the message id (MSB)
-                    _messageIdMsb = value;
-                    _runningChecksum += value;
+                case 3: //save the message id (LSB)
+                    _messageIdLsb = value;
                     _messageId = (UInt16)((_messageIdMsb << 8) + _messageIdLsb);
                     _parserState++;
                     break;
-                case 4: //save the payload size (LSB)
-                    _payloadSizeLsb = value;
-                    _runningChecksum += value;
+                case 4: //save the payload size (MSB)
+                    _payloadSizeMsb = value;
                     _parserState++;
                     break;
-                case 5: //save the payload size (MSB)
-                    _payloadSizeMsb = value;
-                    _runningChecksum += value;
+                case 5: //save the payload size (LSB)
+                    _payloadSizeLsb = value;
                     _payloadSize = (UInt16)((_payloadSizeMsb << 8) + _payloadSizeLsb);
-                    _payloadCounter = 0;
                     _parserState++;
                     break;
                 case 6: //save each byte of the payload
-                    _payloadBuffer[_payloadCounter++] = value;
-                    _runningChecksum += value;
-
+                    _payloadCounter++;
                     if (_payloadCounter == _payloadSize)
                     {
+                        _checksumPayloadIndex = _packetCounter;
                         _parserState++;
                     }
                     break;
-                case 7: //save the checksum (LSB)
-                    _checksumLsb = value;
+                case 7: //save the checksum (MSB)
+                    _checksumMsb = value;
                     _parserState++;
                     break;
-                case 8: //save the checksum (MSB)
-                    _checksumMsb = value;
+                case 8: //save the checksum (LSB)
+                    _checksumLsb = value;
                     _checksum = (UInt16)((_checksumMsb << 8) + _checksumLsb);
-                    _parserState = 0;
-                    full_packet_received = true;
+                    _parserState++;
+                    break;
+                case 9: //verify checksum
+                    if (value == 0)
+                    {
+                        for (int i = 0; i < _checksumPayloadIndex; i++)
+                        {
+                            calculated_checksum += _packetBuffer[i];
+                        }
+
+                        if (_checksum == calculated_checksum)
+                        {
+                            //packet is valid
+                            full_packet_received = true;
+                        }
+                    }
+                    reset_state_machine = true;
                     break;
             }
 
@@ -111,18 +141,20 @@ namespace Lynxa
                 Console.WriteLine("_messageId=" + _messageId);
                 Console.WriteLine("_payloadSize=" + _payloadSize);
                 Console.WriteLine("_checksum=" + _checksum);
-                Console.WriteLine("_runningChecksum=" + _runningChecksum);
+                Console.WriteLine("_calculated_checksum=" + calculated_checksum);
 
-                byte[] payload_buffer_sized = new byte[_payloadSize];
-                Array.Copy(_payloadBuffer, payload_buffer_sized, _payloadSize);
+                byte[] payload_buffer = new byte[_payloadSize];
+                Array.Copy(_packetBuffer, 6, payload_buffer, 0, _payloadSize);
 
-                NmeaRecord_100 nmeaRecord_100 = NmeaRecord_100.Parser.ParseFrom(payload_buffer_sized);
+                GnggaMessage_100 nmeaRecord_100 = GnggaMessage_100.Parser.ParseFrom(payload_buffer);
                 Console.WriteLine("Nmea Record Received:");
-                Console.WriteLine($"Timestamp:{nmeaRecord_100.Timestamp}");
-                Console.WriteLine($"Latitude:{nmeaRecord_100.Latitude}");
-                Console.WriteLine($"Longitude:{nmeaRecord_100.Longitude}");
+                Console.WriteLine($"Latitude:{nmeaRecord_100.LatitudeDegrees}");
+                Console.WriteLine($"Longitude:{nmeaRecord_100.LongitudeDegrees}");
+            }
 
-
+            if (reset_state_machine)
+            {
+                ResetStateMachine();
             }
         }
     }

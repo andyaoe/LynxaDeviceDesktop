@@ -18,6 +18,7 @@ namespace DeviceListener
             _serialPort.ReadTimeout = 1000;
             _serialPort.WriteTimeout = 1000;
             _serialPort.Open();
+            MessageHandler my_message_handler = new MessageHandler();
 
             while (true)
             {
@@ -26,7 +27,7 @@ namespace DeviceListener
                     int data = _serialPort.ReadByte();
                     if (data != -1)
                     {
-                        MessageHandler.ParsePacket((byte)data);
+                        my_message_handler.ParsePacket((byte)data);
                     }
                 }
                 catch (TimeoutException te)
