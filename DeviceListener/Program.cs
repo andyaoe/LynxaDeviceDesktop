@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO.Ports;
 using Lynxa;
-
+using System.IO;
 
 namespace DeviceListener
 {
@@ -21,6 +21,9 @@ namespace DeviceListener
             MessageHandler my_message_handler = new MessageHandler();
             LynxaMessageInfo lynxa_message_info = new LynxaMessageInfo();
 
+            const string fileName = "LynxaMessage.dat";
+            BinaryWriter writer = new BinaryWriter(File.Open(fileName, FileMode.Create));
+
             while (true)
             {
                 try
@@ -28,6 +31,7 @@ namespace DeviceListener
                     int data = _serialPort.ReadByte();
                     if (data != -1)
                     {
+                        writer.Write((byte)data);
                         lynxa_message_info = my_message_handler.ParsePacket((byte)data);
                         if (lynxa_message_info != null)
                         {
@@ -76,6 +80,12 @@ namespace DeviceListener
                 catch (TimeoutException te)
                 {
                     //do nothing
+                    if (Console.KeyAvailable)
+                    {
+                        //save file and exit
+                        writer.Close();
+                        break;
+                    }
                 }
             }
         }
