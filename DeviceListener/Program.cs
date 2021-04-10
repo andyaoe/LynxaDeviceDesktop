@@ -72,6 +72,8 @@ namespace DeviceListener
                                     Console.WriteLine("ModemParameters Received:");
                                     Console.WriteLine($"epochTime:{modemParameters_103.EpochTime}");
                                     Console.WriteLine($"CellId:{modemParameters_103.CellId}");
+                                    Console.WriteLine($"PLMN:{modemParameters_103.Plmn}");
+                                    Console.WriteLine($"TAC:{modemParameters_103.Tac}");
                                     break;
                             }
                         }
