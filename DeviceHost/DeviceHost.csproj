@@ -48,6 +48,7 @@
     <Compile Include="..\LynxaProtocolBuffers\Nanopb.cs">
       <Link>Nanopb.cs</Link>
     </Compile>
+    <Compile Include="CommandLineInterface.cs" />
     <Compile Include="LynxaSerialPort.cs" />
     <Compile Include="MessageHandler.cs" />
     <Compile Include="Program.cs" />

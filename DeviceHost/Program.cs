@@ -7,7 +7,7 @@ using System.IO.Ports;
 using Lynxa;
 using System.IO;
 
-namespace DeviceListener
+namespace Lynxa
 {
     class Program
     {
@@ -17,14 +17,20 @@ namespace DeviceListener
             lynxaSerialPort.LynxaPacketReceivedEvent += LynxaSerialPort_LynxaPacketReceivedEvent;
             lynxaSerialPort.Open();
 
+            CommandLineInterface command_line_interface = new CommandLineInterface(lynxaSerialPort);
+
             while (true)
             {
                 //exit if a key is pressed
-                if (Console.KeyAvailable)
-                {
-                    //save file and exit
-                    break;
-                }
+                //if (Console.KeyAvailable)
+                //{
+                //    //save file and exit
+                //    break;
+                //}
+
+                string input = Console.ReadLine();
+                Console.WriteLine($"echo: { input} ");
+                command_line_interface.Process(input);
             }
         }
 
