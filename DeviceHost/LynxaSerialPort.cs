@@ -85,21 +85,22 @@ namespace Lynxa
                         LynxaMessageInfo lynxa_message_info = _myMessageHandler.ParsePacket((byte)data);
                         if (lynxa_message_info != null)
                         {
-                            switch (lynxa_message_info.messageId)
+                            LynxaMessageId lynxa_message_id = (LynxaMessageId)lynxa_message_info.messageId;
+                            switch (lynxa_message_id)
                             {
-                                case 10:
+                                case LynxaMessageId.DeviceProperty10Id:
                                     DeviceProperty_10 deviceProperty_10 = DeviceProperty_10.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
                                     LynxaPacketReceivedEvent?.Invoke(this, deviceProperty_10);
                                     break;
-                                case 100:
+                                case LynxaMessageId.GnggaMessage100Id:
                                     GnggaMessage_100 nmeaRecord_100 = GnggaMessage_100.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
                                     LynxaPacketReceivedEvent?.Invoke(this, nmeaRecord_100);
                                     break;
-                                case 102:
+                                case LynxaMessageId.WifiStationList102Id:
                                     WifiStationList_102 wifiStationList_102 = WifiStationList_102.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
                                     LynxaPacketReceivedEvent?.Invoke(this, wifiStationList_102);
                                     break;
-                                case 103:
+                                case LynxaMessageId.ModemParameters103Id:
                                     ModemParameters_103 modemParameters_103 = ModemParameters_103.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
                                     LynxaPacketReceivedEvent?.Invoke(this, modemParameters_103);
                                     break;

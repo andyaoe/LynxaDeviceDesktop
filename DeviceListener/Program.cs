@@ -37,9 +37,10 @@ namespace DeviceListener
                         {
 
                             Console.WriteLine("------------------------------------");
-                            switch (lynxa_message_info.messageId)
+                            LynxaMessageId lynxa_message_id = (LynxaMessageId)lynxa_message_info.messageId;
+                            switch (lynxa_message_id)
                             {
-                                case 100:
+                                case LynxaMessageId.GnggaMessage100Id:
                                     GnggaMessage_100 nmeaRecord_100 = GnggaMessage_100.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
                                     Console.WriteLine("Nmea Record Received:");
                                     Console.WriteLine($"epochTime:{nmeaRecord_100.EpochTime}");
@@ -51,7 +52,7 @@ namespace DeviceListener
                                     Console.WriteLine($"longitudeCardinalAscii:{nmeaRecord_100.LongitudeCardinalAscii}");
                                     Console.WriteLine($"numberOfSatellitesInUse:{nmeaRecord_100.NumberOfSatellitesInUse}");
                                     break;
-                                case 102:
+                                case LynxaMessageId.WifiStationList102Id:
                                     WifiStationList_102 wifiStationList_102 = WifiStationList_102.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
                                     Console.WriteLine($"epochTime:{wifiStationList_102.EpochTime}");
                                     Console.WriteLine($"Number of Wifi Stations:{wifiStationList_102.NumberStationsFound}");
@@ -67,7 +68,7 @@ namespace DeviceListener
                                         Console.WriteLine($"RSSI:{wifiStationList_102.WifiStations[i].Rssi}");
                                     }
                                     break;
-                                case 103:
+                                case LynxaMessageId.ModemParameters103Id:
                                     ModemParameters_103 modemParameters_103 = ModemParameters_103.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
                                     Console.WriteLine("ModemParameters Received:");
                                     Console.WriteLine($"epochTime:{modemParameters_103.EpochTime}");
