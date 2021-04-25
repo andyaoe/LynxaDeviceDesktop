@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO.Ports;
 using System.Threading;
+using Google.Protobuf;
 
 namespace Lynxa
 {
@@ -40,6 +41,36 @@ namespace Lynxa
         public void Close()
         {
             _serialPort.Close();
+        }
+
+        public void SendDevicePropertyMessage(string type, string name, string argument)
+        {
+            DeviceProperty_10 deviceProperty = null;
+
+            //if (Enum.TryParse(type, out DeviceProperty_10.Types.DevicePropertyType device_property_type))
+            if (Enum.TryParse(type, true, out DeviceProperty_10.Types.DevicePropertyType device_property_type))
+            {
+                if (Enum.TryParse(name, true, out DeviceProperty_10.Types.DevicePropertyName device_property_name))
+                {
+                    deviceProperty = new DeviceProperty_10();
+                    deviceProperty.Type = device_property_type;
+                    deviceProperty.Name = device_property_name;
+                    deviceProperty.Argument = argument;
+                }
+            }
+
+            if (deviceProperty != null)
+            {
+                LynxaMessageInfo lynxaMessageInfo = new LynxaMessageInfo();
+                lynxaMessageInfo.deviceUid = 0xFFFFFFFF;
+                lynxaMessageInfo.messageId = 10;
+                lynxaMessageInfo.payloadBuffer = deviceProperty.ToByteArray();
+                lynxaMessageInfo.payloadSize = Convert.ToUInt16(lynxaMessageInfo.payloadBuffer.Length);
+
+                byte[] output = MessageHandler.ConstructPacket(lynxaMessageInfo);
+                _serialPort.Write(output, 0, output.Length);
+            }
+
         }
 
         public void Read()

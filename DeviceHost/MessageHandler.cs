@@ -8,12 +8,7 @@ using Google.Protobuf;
 using System.IO;
 
 namespace Lynxa
-{
-    public enum MessageId
-    {
-        Nmea_100 = 100,
-    }
-    
+{    
     public class LynxaMessageInfo
     {
         public byte modifier { get; set; }
@@ -49,6 +44,47 @@ namespace Lynxa
         public MessageHandler()
         {
             ResetStateMachine();
+        }
+
+        public static byte[] ConstructPacket(LynxaMessageInfo messageInfo)
+        {
+            UInt16 message_write_offset = 0;
+            UInt16 checksum = 0;
+            byte[] buffer = new byte[1024];
+
+            //write magic bytes
+            buffer[message_write_offset++] = Convert.ToByte('#');
+            buffer[message_write_offset++] = Convert.ToByte('#');
+            //write modifier
+            buffer[message_write_offset++] = 0xFF;
+            //write device UID
+            buffer[message_write_offset++] = (byte)(messageInfo.deviceUid >> 24);
+            buffer[message_write_offset++] = (byte)(messageInfo.deviceUid >> 16);
+            buffer[message_write_offset++] = (byte)(messageInfo.deviceUid >> 8);
+            buffer[message_write_offset++] = (byte)(messageInfo.deviceUid >> 0);
+            //write message ID
+            buffer[message_write_offset++] = (byte)(messageInfo.messageId >> 8);
+            buffer[message_write_offset++] = (byte)(messageInfo.messageId >> 0);
+            //write payload size
+            buffer[message_write_offset++] = (byte)(messageInfo.payloadSize >> 8);
+            buffer[message_write_offset++] = (byte)(messageInfo.payloadSize >> 0);
+            //write payload
+            Array.Copy(messageInfo.payloadBuffer, 0, buffer, message_write_offset, messageInfo.payloadSize);
+            message_write_offset += messageInfo.payloadSize;
+
+            //calculate context->checksum
+            for (UInt16 i = 0; i < message_write_offset; i++)
+            {
+                checksum += buffer[i];
+            }
+
+            //write context->checksum
+            buffer[message_write_offset++] = (byte)(checksum >> 8);
+            buffer[message_write_offset++] = (byte)(checksum >> 0);
+
+            byte[] output_array = new byte[message_write_offset];
+            Array.Copy(buffer, output_array, output_array.Length);
+            return output_array;
         }
 
         public LynxaMessageInfo ParsePacket(byte value)

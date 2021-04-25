@@ -48,12 +48,32 @@ namespace Lynxa
             if (split_input.Length == 3)
             {
                 input_command = new CommandFields(
-                    split_input[0].ToLower(), 
-                    split_input[1].ToLower(), 
+                    split_input[0].ToLower(),
+                    split_input[1].ToLower(),
                     split_input[2].ToLower());
+
+                if (input_command.type != "set")
+                {
+                    Console.WriteLine("Only SET command can have 3 arguments");
+                    return;
+                }
+            }
+            else if (split_input.Length == 2)
+            {
+                input_command = new CommandFields(
+                    split_input[0].ToLower(),
+                    split_input[1].ToLower(),
+                    "");
+
+                if (input_command.type != "get")
+                {
+                    Console.WriteLine("Only GET command can have 2 arguments");
+                    return;
+                }
             }
             else
             {
+                Console.WriteLine("Not enough arguments");
                 return;
             }
 
@@ -61,20 +81,18 @@ namespace Lynxa
             foreach (string s in command_name_options)
             {
                 //find a command name match
-                if (s == input_command.name)
+                if (s.ToLower() == input_command.name)
                 {
                     if (input_command.type == "get")
                     {
                         receivedCommand = null;
-                        //construct packet using message handler
-                        //send packet using serial port
+                        _serialPort.SendDevicePropertyMessage(input_command.type, input_command.name, input_command.arg);
                         command_found = true;
                     }
                     else if (input_command.type == "set")
                     {
                         receivedCommand = null;
-                        //construct packet using message handler
-                        //send packet using serial port
+                        _serialPort.SendDevicePropertyMessage(input_command.type, input_command.name, input_command.arg);
                         command_found = true;
                     }
                 }
@@ -104,6 +122,11 @@ namespace Lynxa
 
                         Console.WriteLine($"Received { receivedCommand.name } = { receivedCommand.arg }");
                     }
+                }
+
+                if (receivedCommand == null)
+                {
+                    Console.WriteLine("error: no message received from device");
                 }
             }
         }
