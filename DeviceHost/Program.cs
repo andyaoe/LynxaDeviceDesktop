@@ -40,6 +40,10 @@ namespace Lynxa
 
             switch (e)
             {
+                case DeviceProperty_10 devicePropertyMessage:
+                    Console.WriteLine($"device property type:{devicePropertyMessage.Type.ToString()}");
+                    Console.WriteLine($"device property argument:{devicePropertyMessage.Argument}");
+                    break;
                 case GnggaMessage_100 gnggaMessage:
                     Console.WriteLine($"epochTime:{gnggaMessage.EpochTime}");
                     Console.WriteLine($"LatitudeMinutes:{gnggaMessage.LatitudeMinutes}");

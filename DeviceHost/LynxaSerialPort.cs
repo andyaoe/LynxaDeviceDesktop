@@ -87,6 +87,10 @@ namespace Lynxa
                         {
                             switch (lynxa_message_info.messageId)
                             {
+                                case 10:
+                                    DeviceProperty_10 deviceProperty_10 = DeviceProperty_10.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
+                                    LynxaPacketReceivedEvent?.Invoke(this, deviceProperty_10);
+                                    break;
                                 case 100:
                                     GnggaMessage_100 nmeaRecord_100 = GnggaMessage_100.Parser.ParseFrom(lynxa_message_info.payloadBuffer);
                                     LynxaPacketReceivedEvent?.Invoke(this, nmeaRecord_100);
