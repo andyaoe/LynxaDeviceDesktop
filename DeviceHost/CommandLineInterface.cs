@@ -29,9 +29,22 @@ namespace Lynxa
             this.arg = arg;
         }
     }
+    public class ReceivedCommandFields : CommandFields
+    {
+        public string guid;
+
+        public ReceivedCommandFields(string guid, string type, string name, string arg) : base(type, name, arg)
+        {
+            this.guid = guid;
+            this.type = type;
+            this.name = name;
+            this.arg = arg;
+        }
+    }
+
     public class CommandLineInterface
     {
-        private CommandFields receivedCommand = null;
+        private ReceivedCommandFields receivedCommand = null;
         private LynxaSerialPort _serialPort;
 
         public CommandLineInterface(LynxaSerialPort serialPort)
@@ -101,26 +114,31 @@ namespace Lynxa
             if (command_found)
             {
                 DateTime timeout = DateTime.Now.AddSeconds(1);
+                string previous_guid = "";
                 //wait for up to 1 second for return command
                 while (DateTime.Now < timeout)
                 {
                     if (receivedCommand != null)
                     {
-                        //if command is set, compare contents and if they match
-                        if (input_command.type == "set")
+                        if (previous_guid != receivedCommand.guid)
                         {
-                            if ((input_command.name == receivedCommand.name) &&
-                                (input_command.arg == receivedCommand.arg))
+                            previous_guid = receivedCommand.guid;
+                            //if command is set, compare contents and if they match
+                            if (input_command.type == "set")
                             {
-                                Console.WriteLine($"SET { input_command.name } = { input_command.arg } SUCCESS");
+                                if ((input_command.name == receivedCommand.name) &&
+                                    (input_command.arg == receivedCommand.arg))
+                                {
+                                    Console.WriteLine($"SET { input_command.name } = { input_command.arg } SUCCESS");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"SET { input_command.name } = { input_command.arg } FAIL");
+                                }
                             }
-                            else
-                            {
-                                Console.WriteLine($"SET { input_command.name } = { input_command.arg } FAIL");
-                            }
-                        }
 
-                        Console.WriteLine($"Received { receivedCommand.name } = { receivedCommand.arg }");
+                            Console.WriteLine($"Received { receivedCommand.name } = { receivedCommand.arg }");
+                        }
                     }
                 }
 
@@ -134,12 +152,14 @@ namespace Lynxa
         public void LynxaSerialPort_LynxaPacketReceivedEvent(object sender, object e)
         {
             Console.WriteLine($"Received Packet: { e.GetType() }");
+            ;
 
             switch (e)
             {
                 //case DeviceParameter
                 case DeviceProperty_10 deviceProperty:
-                    receivedCommand = new CommandFields(
+                    receivedCommand = new ReceivedCommandFields(
+                        Guid.NewGuid().ToString(),
                         deviceProperty.Type.ToString().ToLower(),
                         deviceProperty.Name.ToString().ToLower(),
                         deviceProperty.Argument.ToLower());

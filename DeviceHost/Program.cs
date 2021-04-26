@@ -14,10 +14,11 @@ namespace Lynxa
         static void Main(string[] args)
         {
             LynxaSerialPort lynxaSerialPort = new LynxaSerialPort("COM2", 9600);
-            lynxaSerialPort.LynxaPacketReceivedEvent += LynxaSerialPort_LynxaPacketReceivedEvent;
             lynxaSerialPort.Open();
 
             CommandLineInterface command_line_interface = new CommandLineInterface(lynxaSerialPort);
+            lynxaSerialPort.LynxaPacketReceivedEvent += LynxaSerialPort_LynxaPacketReceivedEvent;
+            lynxaSerialPort.LynxaPacketReceivedEvent += command_line_interface.LynxaSerialPort_LynxaPacketReceivedEvent;
 
             while (true)
             {
