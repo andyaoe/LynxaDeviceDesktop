@@ -13,7 +13,7 @@ namespace DeviceListener
     {
         static void Main(string[] args)
         {
-            SerialPort _serialPort = new SerialPort("COM2", 115200, Parity.None, 8, StopBits.One);
+            SerialPort _serialPort = new SerialPort("COM2", 9600, Parity.None, 8, StopBits.One);
             _serialPort.Handshake = Handshake.None;
             _serialPort.ReadTimeout = 1000;
             _serialPort.WriteTimeout = 1000;
