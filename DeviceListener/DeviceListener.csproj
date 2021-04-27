@@ -45,6 +45,9 @@
     <Compile Include="..\LynxaProtocolBuffers\LynxaDeviceMessages.cs">
       <Link>LynxaDeviceMessages.cs</Link>
     </Compile>
+    <Compile Include="..\LynxaProtocolBuffers\LynxaDeviceMessageTranslator.cs">
+      <Link>LynxaDeviceMessageTranslator.cs</Link>
+    </Compile>
     <Compile Include="..\LynxaProtocolBuffers\Nanopb.cs">
       <Link>Nanopb.cs</Link>
     </Compile>
